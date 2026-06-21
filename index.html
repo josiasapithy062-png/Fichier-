@@ -1,1 +1,891 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NC-OS — Nelly Creations Operating System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --midnight:#0a1230;
+    --royal:#141f52;
+    --royal-2:#1b2a6b;
+    --azure:#4f7bff;
+    --azure-soft:#7d9dff;
+    --silver:#aab4c8;
+    --silver-dim:#7782a0;
+    --pearl:#eef1f9;
+    --rosegold:#f3a8c6;
+    --gold:#e3c875;
+    --line: rgba(186,196,224,0.16);
+    --shadow: 0 20px 50px rgba(5,8,30,0.45);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(900px 500px at 10% -10%, rgba(79,123,255,0.18), transparent 60%),
+      radial-gradient(700px 500px at 110% 10%, rgba(243,168,198,0.10), transparent 55%),
+      linear-gradient(180deg, var(--midnight), #060a1f 70%);
+    color:var(--pearl);
+    font-family:'Manrope', sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono{font-family:'JetBrains Mono', monospace;}
+  .display{font-family:'Cormorant Garamond', serif;}
+
+  a{color:inherit;}
+  button{font-family:inherit; cursor:pointer;}
+  ::selection{background:var(--azure); color:#fff;}
+
+  .wrap{max-width:780px; margin:0 auto; padding:18px 16px 90px;}
+
+  /* HEADER */
+  header.topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 4px 18px;
+    border-bottom:1px solid var(--line);
+    margin-bottom:22px;
+  }
+  .brand{display:flex; align-items:center; gap:12px;}
+  .brand-text .eyebrow{
+    font-size:10px; letter-spacing:.22em; color:var(--silver-dim);
+    text-transform:uppercase; margin:0 0 2px;
+  }
+  .brand-text h1{
+    font-family:'Cormorant Garamond', serif; font-weight:600; font-size:24px;
+    margin:0; letter-spacing:.02em;
+    background:linear-gradient(90deg, var(--pearl), var(--azure-soft) 60%, var(--rosegold));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .clock-box{text-align:right;}
+  .clock-time{font-size:18px; font-weight:600; letter-spacing:.04em;}
+  .clock-date{font-size:11px; color:var(--silver-dim); text-transform:capitalize;}
+  .clock-status{
+    display:inline-flex; align-items:center; gap:5px; margin-top:4px;
+    font-size:10px; letter-spacing:.1em; color:var(--gold); text-transform:uppercase;
+  }
+  .dot{width:6px; height:6px; border-radius:50%; background:var(--gold); box-shadow:0 0 8px var(--gold);
+    animation:pulse 1.8s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+
+  /* LOGO SVG */
+  .logo-wing{transform-origin:50% 80%; animation:flutter 3.2s ease-in-out infinite;}
+  .logo-wing.right{animation-delay:.05s;}
+  @keyframes flutter{
+    0%,100%{transform:scaleX(1) rotate(0deg);}
+    50%{transform:scaleX(0.88) rotate(-3deg);}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .logo-wing{animation:none;} .dot{animation:none;}
+  }
+
+  /* HERO */
+  .hero{margin-bottom:30px;}
+  .hero p.tagline{
+    font-family:'Cormorant Garamond', serif; font-style:italic; font-size:20px;
+    color:var(--silver); margin:0; max-width:46ch; line-height:1.4;
+  }
+
+  /* SECTION HEADERS */
+  .section{margin-bottom:34px;}
+  .section-head{display:flex; align-items:baseline; gap:10px; margin-bottom:14px;}
+  .section-head .tag{
+    font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--gold);
+    font-family:'JetBrains Mono', monospace;
+  }
+  .section-head h2{
+    font-family:'Cormorant Garamond', serif; font-weight:600; font-size:21px; margin:0;
+  }
+  .section-head .rule{flex:1; height:1px; background:var(--line);}
+
+  /* DOMAIN GRID */
+  .domain-grid{
+    display:grid; grid-template-columns:repeat(2, 1fr); gap:10px;
+  }
+  .domain-card{
+    background:linear-gradient(160deg, var(--royal), var(--royal-2));
+    border:1px solid var(--line); border-radius:14px;
+    padding:14px 12px; text-align:left;
+    display:flex; flex-direction:column; gap:8px;
+    transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+    color:var(--pearl);
+  }
+  .domain-card svg{width:22px; height:22px; stroke:var(--azure-soft);}
+  .domain-card .name{font-size:13px; font-weight:700;}
+  .domain-card .sub{font-size:10.5px; color:var(--silver-dim);}
+  .domain-card:active{transform:scale(0.97);}
+  .domain-card.selected{
+    border-color:var(--azure); box-shadow:0 0 0 1px var(--azure), var(--shadow);
+  }
+
+  /* IDEA INPUT */
+  .panel{
+    background:rgba(20,31,82,0.55); border:1px solid var(--line);
+    border-radius:16px; padding:16px; backdrop-filter:blur(6px);
+  }
+  .field-row{display:flex; gap:8px; flex-wrap:wrap;}
+  input[type=text], textarea{
+    flex:1; min-width:0; background:rgba(8,12,34,0.55); border:1px solid var(--line);
+    border-radius:10px; color:var(--pearl); padding:11px 12px; font-size:14px;
+    font-family:'Manrope', sans-serif;
+  }
+  textarea{width:100%; resize:vertical; min-height:60px;}
+  input::placeholder, textarea::placeholder{color:var(--silver-dim);}
+
+  .btn{
+    border:none; border-radius:10px; padding:11px 16px; font-size:13px; font-weight:700;
+    letter-spacing:.02em; display:inline-flex; align-items:center; gap:7px;
+    transition:transform .12s ease, opacity .12s ease;
+  }
+  .btn:active{transform:scale(0.96);}
+  .btn-primary{background:linear-gradient(90deg, var(--azure), #6d8fff); color:#fff;}
+  .btn-ghost{background:transparent; border:1px solid var(--line); color:var(--pearl);}
+  .btn-gold{background:linear-gradient(90deg, var(--gold), #f0d89a); color:#241a04;}
+  .btn[disabled]{opacity:.5; pointer-events:none;}
+  .btn-row{margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;}
+
+  .hint{font-size:11px; color:var(--silver-dim); margin-top:8px; line-height:1.5;}
+
+  /* LOADING */
+  .loading{display:flex; align-items:center; gap:9px; padding:14px 4px; color:var(--silver);
+    font-size:12.5px;}
+  .spinner{width:14px; height:14px; border-radius:50%; border:2px solid var(--line);
+    border-top-color:var(--azure); animation:spin .7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* IDEAS GRID */
+  .idea-list{display:flex; flex-direction:column; gap:8px; margin-top:14px;}
+  .idea-card{
+    background:rgba(20,31,82,0.45); border:1px solid var(--line); border-radius:12px;
+    padding:12px 13px; text-align:left; color:var(--pearl);
+  }
+  .idea-card .idx{font-family:'JetBrains Mono', monospace; font-size:10px; color:var(--gold);}
+  .idea-card .t{font-weight:700; font-size:13.5px; margin:3px 0 4px;}
+  .idea-card .d{font-size:12px; color:var(--silver); line-height:1.45;}
+  .idea-card button{
+    margin-top:9px; background:none; border:1px solid var(--azure); color:var(--azure-soft);
+    border-radius:8px; padding:6px 11px; font-size:11.5px; font-weight:700;
+  }
+
+  /* GUIDE */
+  .guide-meta{display:flex; gap:14px; flex-wrap:wrap; font-size:11px; color:var(--silver-dim);
+    margin-bottom:14px; font-family:'JetBrains Mono', monospace;}
+  .guide-meta b{color:var(--gold); font-weight:600;}
+  h3.sub-h{
+    font-size:13px; text-transform:uppercase; letter-spacing:.1em; color:var(--azure-soft);
+    margin:18px 0 10px; display:flex; align-items:center; gap:7px;
+  }
+  ul.materials{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px;}
+  ul.materials li{
+    display:flex; align-items:flex-start; gap:9px; font-size:13px; padding:9px 10px;
+    background:rgba(8,12,34,0.4); border-radius:9px; border:1px solid var(--line);
+  }
+  ul.materials li label{flex:1;}
+  ul.materials input[type=checkbox]{accent-color:var(--azure); width:16px; height:16px; margin-top:2px;}
+  .step{
+    display:flex; gap:11px; padding:13px 0; border-top:1px dashed var(--line);
+  }
+  .step:first-of-type{border-top:none;}
+  .step .num{
+    flex-shrink:0; width:26px; height:26px; border-radius:50%; background:var(--royal-2);
+    border:1px solid var(--azure); color:var(--azure-soft); font-size:12px; font-weight:700;
+    display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono', monospace;
+  }
+  .step.done .num{background:var(--azure); color:#fff;}
+  .step .body{flex:1;}
+  .step .phase{font-size:10px; text-transform:uppercase; letter-spacing:.1em; color:var(--gold); margin-bottom:3px;}
+  .step .txt{font-size:13.5px; line-height:1.55; color:var(--pearl);}
+  .step.done .txt{color:var(--silver-dim); text-decoration:line-through;}
+  .step-check{margin-left:auto; flex-shrink:0;}
+  .step-check input{accent-color:var(--azure); width:17px; height:17px;}
+
+  /* TRACKER */
+  .proj-item{
+    display:flex; align-items:center; gap:10px; padding:12px 13px;
+    background:rgba(20,31,82,0.45); border:1px solid var(--line); border-radius:12px; margin-bottom:8px;
+  }
+  .proj-item .pname{font-weight:700; font-size:13px;}
+  .proj-item .pmeta{font-size:10.5px; color:var(--silver-dim); margin-top:2px;}
+  select.status-pick{
+    background:rgba(8,12,34,0.6); color:var(--pearl); border:1px solid var(--line);
+    border-radius:8px; font-size:11px; padding:6px 7px;
+  }
+  .icon-btn{background:none; border:none; color:var(--silver-dim); font-size:16px; padding:4px;}
+  .empty{font-size:12.5px; color:var(--silver-dim); padding:14px 2px; font-style:italic;}
+
+  /* IMAGE ANALYSIS */
+  .upload-zone{
+    border:1.5px dashed var(--line); border-radius:14px; padding:20px; text-align:center;
+    color:var(--silver-dim); font-size:12.5px; cursor:pointer;
+  }
+  .upload-zone img{max-width:100%; border-radius:10px; margin-top:10px; display:block;}
+  .analysis-out{
+    margin-top:14px; font-size:13.5px; line-height:1.6; color:var(--pearl);
+    background:rgba(8,12,34,0.4); border-radius:10px; padding:13px; border:1px solid var(--line);
+    white-space:pre-wrap;
+  }
+
+  footer{text-align:center; font-size:10.5px; color:var(--silver-dim); margin-top:40px;
+    font-family:'JetBrains Mono', monospace; letter-spacing:.04em;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="topbar">
+    <div class="brand">
+      <svg width="38" height="38" viewBox="0 0 100 100" fill="none">
+        <ellipse class="logo-wing left" cx="32" cy="48" rx="20" ry="26" fill="url(#g1)" opacity="0.92"/>
+        <ellipse class="logo-wing right" cx="68" cy="48" rx="20" ry="26" fill="url(#g2)" opacity="0.92"/>
+        <line x1="50" y1="30" x2="50" y2="72" stroke="#cfd6ea" stroke-width="2"/>
+        <path d="M38 18 L44 26 L50 16 L56 26 L62 18 L58 30 L42 30 Z" fill="#e3c875"/>
+        <circle cx="46" cy="60" r="2.4" fill="#f3a8c6"/>
+        <circle cx="56" cy="64" r="2" fill="#f3a8c6"/>
+        <defs>
+          <linearGradient id="g1" x1="12" y1="22" x2="52" y2="74" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#7d9dff"/><stop offset="1" stop-color="#1b2a6b"/>
+          </linearGradient>
+          <linearGradient id="g2" x1="88" y1="22" x2="48" y2="74" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#aab4c8"/><stop offset="1" stop-color="#3d4f9e"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <div class="brand-text">
+        <p class="eyebrow mono">Nelly Creations</p>
+        <h1>NC&#8209;OS</h1>
+      </div>
+    </div>
+    <div class="clock-box">
+      <div class="clock-time mono" id="clockTime">--:--:--</div>
+      <div class="clock-date" id="clockDate">—</div>
+      <div class="clock-status mono"><span class="dot"></span>Moteur Actif</div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <p class="tagline">« Apprendre, concevoir, fabriquer — un guide, une étape à la fois. »</p>
+  </section>
+
+  <!-- DOMAINES -->
+  <section class="section">
+    <div class="section-head"><span class="tag mono">01</span><h2>Choisir un domaine</h2><div class="rule"></div></div>
+    <div class="domain-grid" id="domainGrid"></div>
+  </section>
+
+  <!-- CARNET D'IDÉES RAPIDES -->
+  <section class="section">
+    <div class="section-head"><span class="tag mono">02</span><h2>Carnet d'idées rapides</h2><div class="rule"></div></div>
+    <div class="panel">
+      <p class="hint" style="margin-top:0;">Une petite idée te traverse l'esprit ? Note-la ici en 2 secondes, sans choisir de domaine ni lancer de guide. Elle reste enregistrée sur cet appareil jusqu'à ce que tu la transformes en projet.</p>
+      <div class="field-row">
+        <input type="text" id="quickIdeaInput" placeholder="Ex : petite armoire en carton pour poupées…">
+        <button class="btn btn-gold" id="btnQuickAdd">＋ Noter</button>
+      </div>
+      <div id="quickIdeasList" style="margin-top:14px;"></div>
+    </div>
+  </section>
+
+  <!-- LANCEMENT -->
+  <section class="section">
+    <div class="section-head"><span class="tag mono">03</span><h2>Lancer un projet</h2><div class="rule"></div></div>
+    <div class="panel">
+      <div class="field-row">
+        <input type="text" id="ideaInput" placeholder="Décris une idée précise, ou laisse vide pour explorer…">
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btnInitProject">⚙ Initialiser ce projet</button>
+        <button class="btn btn-gold" id="btnGen50">✦ Générer 50 idées du domaine</button>
+      </div>
+      <p class="hint">Sélectionne d'abord un domaine ci-dessus. Le générateur évite les idées déjà proposées sur cet appareil.</p>
+      <div id="ideasLoading"></div>
+      <div class="idea-list" id="ideasList"></div>
+    </div>
+  </section>
+
+  <!-- GUIDE -->
+  <section class="section" id="guideSection" style="display:none;">
+    <div class="section-head"><span class="tag mono">04</span><h2>Guide actif</h2><div class="rule"></div></div>
+    <div class="panel" id="guidePanel"></div>
+  </section>
+
+  <!-- TRACKER -->
+  <section class="section">
+    <div class="section-head"><span class="tag mono">05</span><h2>Suivi des projets</h2><div class="rule"></div></div>
+    <div id="trackerList"></div>
+  </section>
+
+  <!-- ANALYSE VISUELLE -->
+  <section class="section">
+    <div class="section-head"><span class="tag mono">06</span><h2>Analyse visuelle</h2><div class="rule"></div></div>
+    <div class="panel">
+      <p class="hint" style="margin-top:0;">Deux usages : envoie une photo d'un objet que tu aimerais fabriquer mais dont tu ne connais pas le nom (NELLY l'identifie), ou une photo de ta réalisation en cours (NELLY te corrige).</p>
+      <div class="upload-zone" id="uploadZone">
+        📷 Touche pour envoyer une photo
+        <input type="file" accept="image/*" id="fileInput" style="display:none;">
+        <img id="previewImg" style="display:none;">
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-ghost" id="btnModeIdentify">🔍 Qu'est-ce que c'est ?</button>
+        <button class="btn btn-ghost" id="btnModeReview">🛠 Corrige ma réalisation</button>
+      </div>
+      <textarea id="analysisQuestion" placeholder="Ou écris ta propre question…" style="margin-top:10px;"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btnAnalyze" disabled>🔍 Analyser la photo</button>
+      </div>
+      <div id="analysisLoading"></div>
+      <div class="analysis-out" id="analysisOut" style="display:none;"></div>
+    </div>
+  </section>
+
+  <!-- LIEN DU SYSTÈME -->
+  <section class="section">
+    <div class="section-head"><span class="tag mono">07</span><h2>Lien du système</h2><div class="rule"></div></div>
+    <div class="panel">
+      <p class="hint" style="margin-top:0;">Une fois ce fichier publié depuis l'app Claude (bouton Partager/Publier), colle ici l'adresse obtenue. Elle restera enregistrée et accessible directement ici, à chaque ouverture.</p>
+      <div class="field-row">
+        <input type="text" id="systemLinkInput" placeholder="https://claude.ai/public/...">
+        <button class="btn btn-gold" id="btnSaveLink">💾 Enregistrer</button>
+      </div>
+      <div id="systemLinkDisplay" style="margin-top:12px;"></div>
+    </div>
+  </section>
+
+  <!-- MODE AUTONOME -->
+  <section class="section">
+    <div class="section-head"><span class="tag mono">08</span><h2>Mode autonome (hors app Claude)</h2><div class="rule"></div></div>
+    <div class="panel">
+      <p class="hint" style="margin-top:0;">Si ce fichier est hébergé ailleurs que dans l'app Claude (ex : GitHub Pages), les boutons IA ont besoin d'une clé API personnelle pour fonctionner. Crée-en une gratuitement sur <a href="https://console.anthropic.com" target="_blank" style="color:var(--azure-soft);">console.anthropic.com</a>, colle-la ci-dessous : elle reste uniquement sur cet appareil, jamais dans le fichier ni visible par quelqu'un d'autre.</p>
+      <div class="field-row">
+        <input type="password" id="apiKeyInput" placeholder="sk-ant-...">
+        <button class="btn btn-gold" id="btnSaveKey">💾 Enregistrer</button>
+      </div>
+      <div id="apiKeyStatus" style="margin-top:10px;"></div>
+    </div>
+  </section>
+
+  <footer>NC&#8209;OS // SYSTÈME D'EXPLOITATION CRÉATIF · FONCTIONNE ENTIÈREMENT DANS CE FICHIER</footer>
+</div>
+
+<script>
+/* ---------- CONFIG ---------- */
+const DOMAINS = [
+  {id:'electronique', name:'Électronique & Robotique', sub:'Circuits, capteurs, microcontrôleurs',
+    icon:'<path d="M9 9h6v6H9z"/><path d="M9 3v3M15 3v3M9 18v3M15 18v3M3 9h3M3 15h3M18 9h3M18 15h3"/>'},
+  {id:'cuisine', name:'Cuisine & Gastronomie', sub:'Recettes, techniques, dressage',
+    icon:'<path d="M4 3v7a4 4 0 0 0 8 0V3M8 3v7M4 3h0M16 3c-2 2-2 6 0 9v9"/>'},
+  {id:'artisanat', name:'Artisanat & DIY', sub:'Objets, déco, upcycling',
+    icon:'<path d="M6 9l4 4-7 7-2-2 7-7zM14 4l6 6-3 3-6-6zM13 5l4 4"/>'},
+  {id:'maquettes', name:'Maquettes & Petits Objets', sub:'Jouets, mini-meubles, fleurs en papier',
+    icon:'<path d="M4 21V9l8-5 8 5v12M9 21v-6h6v6M4 9l8 5 8-5"/>'},
+  {id:'code', name:'Code & Développement', sub:'Apps, sites, scripts',
+    icon:'<path d="M8 9l-4 4 4 4M16 9l4 4-4 4M13 5l-3 14"/>'},
+  {id:'bois', name:'Menuiserie & Bois', sub:'Meubles, structures, finitions',
+    icon:'<path d="M3 21l9-9M14 4l6 6-3.5 3.5L10 7zM3 21l4-1-1-4"/>'},
+  {id:'musique', name:'Musique & Audio', sub:'Composition, enregistrement, mix',
+    icon:'<path d="M9 18V5l11-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM20 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>'},
+  {id:'couture', name:'Couture & Mode', sub:'Vêtements, accessoires, patrons',
+    icon:'<path d="M6 6l12 12M18 6L6 18M6 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM22 18a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/>'},
+  {id:'mecanique', name:'Mécanique', sub:'Réparation, montage, optimisation',
+    icon:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.2a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.2a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.2a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.2a1.6 1.6 0 0 0-1.4 1z"/>'}
+];
+
+let selectedDomain = null;
+let activeGuide = null; // {projectId, domain, title, materials[], steps[]}
+
+/* ---------- CLOCK (real-time) ---------- */
+function tickClock(){
+  const now = new Date();
+  document.getElementById('clockTime').textContent =
+    now.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+  document.getElementById('clockDate').textContent =
+    now.toLocaleDateString('fr-FR', {weekday:'long', day:'2-digit', month:'long', year:'numeric'});
+}
+tickClock(); setInterval(tickClock, 1000);
+
+/* ---------- DOMAIN GRID ---------- */
+const grid = document.getElementById('domainGrid');
+DOMAINS.forEach(d=>{
+  const card = document.createElement('button');
+  card.className = 'domain-card';
+  card.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${d.icon}</svg>
+    <div class="name">${d.name}</div><div class="sub">${d.sub}</div>`;
+  card.addEventListener('click', ()=>{
+    selectedDomain = d;
+    document.querySelectorAll('.domain-card').forEach(c=>c.classList.remove('selected'));
+    card.classList.add('selected');
+  });
+  grid.appendChild(card);
+});
+
+/* ---------- CLAUDE API HELPER ---------- */
+function getApiKey(){ return localStorage.getItem('ncos_api_key') || null; }
+
+async function callClaude({system, userContent, maxTokens=1500}, attempt=1){
+  const apiKey = getApiKey();
+  const headers = {'Content-Type':'application/json'};
+  if(apiKey){
+    // Mode autonome : la page tourne hors de l'app Claude (ex: GitHub Pages),
+    // donc on utilise la clé personnelle saisie une fois et stockée uniquement
+    // sur cet appareil (jamais écrite dans le fichier lui-même).
+    headers['x-api-key'] = apiKey;
+    headers['anthropic-version'] = '2023-06-01';
+    headers['anthropic-dangerous-direct-browser-access'] = 'true';
+  }
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method:'POST',
+    headers,
+    body: JSON.stringify({
+      model:'claude-sonnet-4-6',
+      max_tokens: maxTokens,
+      system: system,
+      messages:[{role:'user', content:userContent}]
+    })
+  });
+  if(res.status===429){
+    // Trop de requêtes envoyées d'un coup — on patiente puis on retente automatiquement.
+    if(attempt<=3){
+      await new Promise(r=>setTimeout(r, attempt*4000));
+      return callClaude({system, userContent, maxTokens}, attempt+1);
+    }
+    throw new Error('Trop de requêtes en peu de temps (429) — attends une minute puis réessaie');
+  }
+  if(res.status===401){
+    throw new Error('Clé API invalide ou absente — vérifie-la dans la section 08 "Mode autonome"');
+  }
+  if(!res.ok) throw new Error('Erreur API: '+res.status);
+  const data = await res.json();
+  const text = (data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n');
+  return text;
+}
+function repairJSON(text){
+  let t = text.trim().replace(/^```json/i,'').replace(/^```/,'').replace(/```$/,'').trim();
+  const firstBrace = Math.min(...['{','['].map(ch=>{const i=t.indexOf(ch); return i===-1?Infinity:i;}));
+  if(firstBrace !== Infinity && firstBrace>0) t = t.slice(firstBrace);
+
+  // 1) Try a direct parse first — works when the response wasn't truncated.
+  try { return JSON.parse(t); } catch(e){}
+
+  // 2) JSON repair: the API response was likely cut off mid-string because
+  // max_tokens was reached. Walk the text tracking bracket depth and string
+  // state, remember the last "safe" point (end of a complete value), then
+  // truncate there and close any still-open brackets/braces.
+  let stack = [];
+  let inString = false, escape = false;
+  let lastSafeIdx = -1, lastSafeStack = [];
+  for(let i=0;i<t.length;i++){
+    const c = t[i];
+    if(inString){
+      if(escape){ escape=false; }
+      else if(c==='\\'){ escape=true; }
+      else if(c==='"'){ inString=false; lastSafeIdx=i; lastSafeStack=stack.slice(); }
+      continue;
+    }
+    if(c==='"'){ inString=true; continue; }
+    if(c==='{'||c==='['){ stack.push(c); }
+    else if(c==='}'||c===']'){ if(stack.length) stack.pop(); lastSafeIdx=i; lastSafeStack=stack.slice(); }
+    else if(c===','){ lastSafeIdx=i-1; lastSafeStack=stack.slice(); }
+  }
+  if(lastSafeIdx<0) throw new Error('Réponse JSON irréparable, trop courte ou vide');
+  let truncated = t.slice(0, lastSafeIdx+1).replace(/,\s*$/,'');
+  let closing = '';
+  for(let i=lastSafeStack.length-1;i>=0;i--) closing += lastSafeStack[i]==='{' ? '}' : ']';
+  return JSON.parse(truncated + closing);
+}
+
+/* ---------- IDEA HISTORY (no-repeat) ---------- */
+function getHistory(domainId){
+  const all = JSON.parse(localStorage.getItem('ncos_idea_history')||'{}');
+  return all[domainId] || [];
+}
+function pushHistory(domainId, titles){
+  const all = JSON.parse(localStorage.getItem('ncos_idea_history')||'{}');
+  all[domainId] = [...(all[domainId]||[]), ...titles].slice(-400);
+  localStorage.setItem('ncos_idea_history', JSON.stringify(all));
+}
+
+/* ---------- GENERATE 50 IDEAS ---------- */
+document.getElementById('btnGen50').addEventListener('click', async ()=>{
+  if(!selectedDomain){ alert('Choisis d\'abord un domaine ci-dessus.'); return; }
+  const loadingEl = document.getElementById('ideasLoading');
+  const listEl = document.getElementById('ideasList');
+  listEl.innerHTML = '';
+  loadingEl.innerHTML = `<div class="loading"><div class="spinner"></div>Génération de 50 idées inédites pour « ${selectedDomain.name} »…</div>`;
+  const history = getHistory(selectedDomain.id);
+  const buildParams = ()=>({
+    maxTokens: 8192,
+    system: `Tu es le moteur de génération créative de NC-OS. Tu produis des idées de projets concrets, réalisables chez soi, dans le domaine donné. Réponds UNIQUEMENT avec un tableau JSON valide, compact, sans aucun texte autour, sans balises markdown. Chaque élément: {"title": string court (max 8 mots), "description": 1 phrase courte (max 18 mots)}. Reste neutre géographiquement, aucune référence culturelle ou régionale spécifique. Priorité absolue : produire un JSON complet et valide plutôt que des descriptions longues — reste concis pour ne jamais être coupé.`,
+    userContent: `Domaine : ${selectedDomain.name}.
+Génère exactement 50 idées de projets DIFFÉRENTES, originales, variées en difficulté (débutant à avancé), jamais génériques. Descriptions courtes et concises.
+N'inclus AUCUNE des idées déjà proposées précédemment (titres à éviter) : ${history.length? history.slice(-120).join(' | ') : 'aucune'}.
+Réponds strictement en JSON compact: [{"title":"...","description":"..."}, ...]`
+  });
+  let ideas;
+  try{
+    const text = await callClaude(buildParams());
+    ideas = repairJSON(text);
+  }catch(e1){
+    try{
+      loadingEl.innerHTML = `<div class="loading"><div class="spinner"></div>Nouvelle tentative…</div>`;
+      const text2 = await callClaude(buildParams());
+      ideas = repairJSON(text2);
+    }catch(e2){
+      loadingEl.innerHTML = `<div class="loading">⚠ Échec de la génération (${e2.message}). Réessaie.</div>`;
+      return;
+    }
+  }
+  try{
+    loadingEl.innerHTML = '';
+    pushHistory(selectedDomain.id, ideas.map(i=>i.title));
+    ideas.forEach((idea, i)=>{
+      const card = document.createElement('div');
+      card.className = 'idea-card';
+      card.innerHTML = `<div class="idx">${String(i+1).padStart(2,'0')} / 50</div>
+        <div class="t">${idea.title}</div>
+        <div class="d">${idea.description}</div>
+        <button data-title="${idea.title.replace(/"/g,'&quot;')}">Initialiser ce projet →</button>`;
+      card.querySelector('button').addEventListener('click', ()=>{
+        document.getElementById('ideaInput').value = idea.title;
+        initProject(idea.title);
+      });
+      listEl.appendChild(card);
+    });
+  }catch(e){
+    loadingEl.innerHTML = `<div class="loading">⚠ Échec de l'affichage (${e.message}). Réessaie.</div>`;
+  }
+});
+
+/* ---------- INITIALIZE A PROJECT / GUIDE ---------- */
+document.getElementById('btnInitProject').addEventListener('click', ()=>{
+  const v = document.getElementById('ideaInput').value.trim();
+  if(!v && !selectedDomain){ alert('Décris une idée ou choisis un domaine.'); return; }
+  initProject(v || `Idée libre — ${selectedDomain.name}`);
+});
+
+async function initProject(title){
+  if(!selectedDomain){ alert('Choisis d\'abord un domaine ci-dessus.'); return; }
+  const section = document.getElementById('guideSection');
+  const panel = document.getElementById('guidePanel');
+  section.style.display = 'block';
+  section.scrollIntoView({behavior:'smooth', block:'start'});
+  panel.innerHTML = `<div class="loading"><div class="spinner"></div>NELLY prépare le guide d'apprentissage pour « ${title} »…</div>`;
+  const buildParams = ()=>({
+    maxTokens: 8192,
+    system: `Tu es NELLY, architecte pédagogique de NC-OS. Tu écris des guides étape par étape ultra-concrets pour que la personne réalise elle-même le projet chez elle, avec ce qu'elle a sous la main. Réponds UNIQUEMENT en JSON valide et compact, sans texte autour, sans markdown. Format exact:
+{"materials":[{"item":string,"spec":string}], "phases":[{"phase":string court (ex: "Préparation & sécurité"), "steps":[string instruction détaillée]}]}
+Limite-toi à 3-4 phases et 3-6 étapes par phase, et à 10 matériaux maximum. Reste neutre géographiquement et culturellement. Sois précis (quantités, durées, températures, outils) mais concis. Priorité absolue : produire un JSON complet et valide plutôt que des textes longs — reste concis pour ne jamais être coupé.`,
+    userContent: `Domaine : ${selectedDomain.name}. Projet : "${title}". Crée le guide complet.`
+  });
+  let guide;
+  try{
+    const text = await callClaude(buildParams());
+    guide = repairJSON(text);
+  }catch(e1){
+    try{
+      panel.innerHTML = `<div class="loading"><div class="spinner"></div>Nouvelle tentative…</div>`;
+      const text2 = await callClaude(buildParams());
+      guide = repairJSON(text2);
+    }catch(e2){
+      panel.innerHTML = `<div class="loading">⚠ Échec de la génération (${e2.message}). Réessaie.</div>`;
+      return;
+    }
+  }
+  try{
+    activeGuide = {
+      id: 'p_'+Date.now(),
+      title, domain: selectedDomain.name,
+      materials: guide.materials.map(m=>({...m, done:false})),
+      phases: guide.phases.map(ph=>({...ph, steps: ph.steps.map(s=>({text:s, done:false}))}))
+    };
+    renderGuide();
+    saveProject(activeGuide, 'En cours');
+  }catch(e){
+    panel.innerHTML = `<div class="loading">⚠ Échec de l'affichage (${e.message}). Réessaie.</div>`;
+  }
+}
+
+function renderGuide(){
+  const panel = document.getElementById('guidePanel');
+  const g = activeGuide;
+  let matHtml = g.materials.map((m,i)=>`
+    <li><input type="checkbox" data-mat="${i}" ${m.done?'checked':''}>
+    <label>${m.item} — <span style="color:var(--silver-dim)">${m.spec}</span></label></li>`).join('');
+  let stepsHtml = '';
+  g.phases.forEach((ph, pi)=>{
+    ph.steps.forEach((st, si)=>{
+      stepsHtml += `<div class="step ${st.done?'done':''}">
+        <div class="num">${si+1}</div>
+        <div class="body"><div class="phase">${ph.phase}</div><div class="txt">${st.text}</div></div>
+        <div class="step-check"><input type="checkbox" data-phase="${pi}" data-step="${si}" ${st.done?'checked':''}></div>
+      </div>`;
+    });
+  });
+  panel.innerHTML = `
+    <div class="guide-meta">
+      <span><b>PROJET</b> ${g.title}</span>
+      <span><b>DOMAINE</b> ${g.domain}</span>
+    </div>
+    <h3 class="sub-h">📋 Matériaux requis</h3>
+    <ul class="materials">${matHtml}</ul>
+    <h3 class="sub-h">🛠 Guide étape par étape</h3>
+    ${stepsHtml}
+  `;
+  panel.querySelectorAll('[data-mat]').forEach(cb=>{
+    cb.addEventListener('change', ()=>{
+      g.materials[+cb.dataset.mat].done = cb.checked;
+      updateProject(g);
+    });
+  });
+  panel.querySelectorAll('[data-phase]').forEach(cb=>{
+    cb.addEventListener('change', ()=>{
+      const p=+cb.dataset.phase, s=+cb.dataset.step;
+      g.phases[p].steps[s].done = cb.checked;
+      cb.closest('.step').classList.toggle('done', cb.checked);
+      updateProject(g);
+    });
+  });
+}
+
+/* ---------- PROJECT TRACKER ---------- */
+function getProjects(){ return JSON.parse(localStorage.getItem('ncos_projects')||'[]'); }
+function setProjects(list){ localStorage.setItem('ncos_projects', JSON.stringify(list)); }
+
+function saveProject(guide, status){
+  const list = getProjects();
+  list.unshift({id:guide.id, title:guide.title, domain:guide.domain, status, guide, created:Date.now()});
+  setProjects(list);
+  renderTracker();
+}
+function updateProject(guide){
+  const list = getProjects();
+  const idx = list.findIndex(p=>p.id===guide.id);
+  if(idx>-1){ list[idx].guide = guide; setProjects(list); }
+}
+function renderTracker(){
+  const el = document.getElementById('trackerList');
+  const list = getProjects();
+  if(!list.length){ el.innerHTML = '<div class="empty">Aucun projet pour l\'instant. Initialise une idée ci-dessus.</div>'; return; }
+  el.innerHTML = '';
+  list.forEach(p=>{
+    const row = document.createElement('div');
+    row.className = 'proj-item';
+    row.innerHTML = `
+      <div style="flex:1;">
+        <div class="pname">${p.title}</div>
+        <div class="pmeta">${p.domain} · ${new Date(p.created).toLocaleDateString('fr-FR')}</div>
+      </div>
+      <select class="status-pick">
+        <option ${p.status==='Planifié'?'selected':''}>Planifié</option>
+        <option ${p.status==='En cours'?'selected':''}>En cours</option>
+        <option ${p.status==='Terminé'?'selected':''}>Terminé</option>
+      </select>
+      <button class="icon-btn" title="Ouvrir">↗</button>
+      <button class="icon-btn" title="Supprimer">✕</button>
+    `;
+    row.querySelector('.status-pick').addEventListener('change', e=>{
+      const l = getProjects(); const i = l.findIndex(x=>x.id===p.id);
+      l[i].status = e.target.value; setProjects(l);
+    });
+    row.querySelectorAll('.icon-btn')[0].addEventListener('click', ()=>{
+      activeGuide = p.guide;
+      document.getElementById('guideSection').style.display='block';
+      renderGuide();
+      document.getElementById('guideSection').scrollIntoView({behavior:'smooth'});
+    });
+    row.querySelectorAll('.icon-btn')[1].addEventListener('click', ()=>{
+      if(confirm('Supprimer ce projet ?')){
+        setProjects(getProjects().filter(x=>x.id!==p.id));
+        renderTracker();
+      }
+    });
+    el.appendChild(row);
+  });
+}
+renderTracker();
+
+/* ---------- CARNET D'IDÉES RAPIDES ---------- */
+function getQuickIdeas(){ return JSON.parse(localStorage.getItem('ncos_quick_ideas')||'[]'); }
+function setQuickIdeas(list){ localStorage.setItem('ncos_quick_ideas', JSON.stringify(list)); }
+
+function addQuickIdea(){
+  const input = document.getElementById('quickIdeaInput');
+  const text = input.value.trim();
+  if(!text) return;
+  const list = getQuickIdeas();
+  list.unshift({id:'q_'+Date.now(), text, created:Date.now()});
+  setQuickIdeas(list);
+  input.value = '';
+  renderQuickIdeas();
+}
+document.getElementById('btnQuickAdd').addEventListener('click', addQuickIdea);
+document.getElementById('quickIdeaInput').addEventListener('keydown', e=>{
+  if(e.key==='Enter') addQuickIdea();
+});
+
+function renderQuickIdeas(){
+  const el = document.getElementById('quickIdeasList');
+  const list = getQuickIdeas();
+  if(!list.length){ el.innerHTML = '<div class="empty">Aucune idée notée pour l\'instant.</div>'; return; }
+  el.innerHTML = '';
+  list.forEach(q=>{
+    const row = document.createElement('div');
+    row.className = 'proj-item';
+    row.innerHTML = `
+      <div style="flex:1;">
+        <div class="pname">${q.text}</div>
+        <div class="pmeta">${new Date(q.created).toLocaleDateString('fr-FR')}</div>
+      </div>
+      <button class="icon-btn" title="Transformer en projet">⚙</button>
+      <button class="icon-btn" title="Supprimer">✕</button>
+    `;
+    row.querySelectorAll('.icon-btn')[0].addEventListener('click', ()=>{
+      if(!selectedDomain){
+        alert('Choisis d\'abord un domaine en haut (section 01) pour transformer cette idée en projet.');
+        document.getElementById('domainGrid').scrollIntoView({behavior:'smooth'});
+        return;
+      }
+      document.getElementById('ideaInput').value = q.text;
+      initProject(q.text);
+      setQuickIdeas(getQuickIdeas().filter(x=>x.id!==q.id));
+      renderQuickIdeas();
+    });
+    row.querySelectorAll('.icon-btn')[1].addEventListener('click', ()=>{
+      setQuickIdeas(getQuickIdeas().filter(x=>x.id!==q.id));
+      renderQuickIdeas();
+    });
+    el.appendChild(row);
+  });
+}
+renderQuickIdeas();
+
+/* ---------- LIEN DU SYSTÈME ---------- */
+function renderSystemLink(){
+  const url = localStorage.getItem('ncos_system_link');
+  const el = document.getElementById('systemLinkDisplay');
+  if(!url){ el.innerHTML = '<div class="empty">Aucun lien enregistré pour l\'instant.</div>'; return; }
+  el.innerHTML = `
+    <div class="proj-item">
+      <div style="flex:1; overflow:hidden;">
+        <div class="pname">🔗 Mon système NC-OS</div>
+        <a href="${url}" target="_blank" rel="noopener" class="pmeta" style="word-break:break-all; color:var(--azure-soft); text-decoration:underline;">${url}</a>
+      </div>
+      <button class="icon-btn" title="Supprimer" id="btnDeleteLink">✕</button>
+    </div>`;
+  document.getElementById('btnDeleteLink').addEventListener('click', ()=>{
+    localStorage.removeItem('ncos_system_link');
+    renderSystemLink();
+  });
+}
+document.getElementById('btnSaveLink').addEventListener('click', ()=>{
+  const input = document.getElementById('systemLinkInput');
+  const url = input.value.trim();
+  if(!url){ return; }
+  if(!/^https?:\/\//i.test(url)){ alert('Le lien doit commencer par http:// ou https://'); return; }
+  localStorage.setItem('ncos_system_link', url);
+  input.value = '';
+  renderSystemLink();
+});
+renderSystemLink();
+
+/* ---------- MODE AUTONOME (clé API personnelle) ---------- */
+function renderApiKeyStatus(){
+  const key = getApiKey();
+  const el = document.getElementById('apiKeyStatus');
+  if(key){
+    el.innerHTML = `<div class="proj-item">
+      <div style="flex:1;"><div class="pname">✅ Clé enregistrée</div><div class="pmeta">${key.slice(0,8)}••••••••${key.slice(-4)}</div></div>
+      <button class="icon-btn" id="btnClearKey" title="Supprimer">✕</button>
+    </div>`;
+    document.getElementById('btnClearKey').addEventListener('click', ()=>{
+      localStorage.removeItem('ncos_api_key');
+      renderApiKeyStatus();
+    });
+  } else {
+    el.innerHTML = '<div class="empty">Aucune clé — le système utilise le mode intégré à l\'app Claude par défaut.</div>';
+  }
+}
+document.getElementById('btnSaveKey').addEventListener('click', ()=>{
+  const input = document.getElementById('apiKeyInput');
+  const key = input.value.trim();
+  if(!key) return;
+  if(!key.startsWith('sk-ant-')){ alert('Cette clé ne ressemble pas à une clé Anthropic valide (elle doit commencer par "sk-ant-").'); return; }
+  localStorage.setItem('ncos_api_key', key);
+  input.value = '';
+  renderApiKeyStatus();
+});
+renderApiKeyStatus();
+
+let uploadedBase64 = null, uploadedMediaType = null;
+const fileInput = document.getElementById('fileInput');
+document.getElementById('uploadZone').addEventListener('click', ()=> fileInput.click());
+
+// Les photos de téléphone (souvent 3-12 Mo) sont redimensionnées et compressées
+// côté navigateur avant l'envoi, sinon l'API les refuse ou l'envoi traîne/échoue.
+fileInput.addEventListener('change', ()=>{
+  const file = fileInput.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    const img = new Image();
+    img.onload = ()=>{
+      const maxDim = 1280;
+      let w = img.naturalWidth, h = img.naturalHeight;
+      if(w>maxDim || h>maxDim){
+        if(w>h){ h = Math.round(h*maxDim/w); w = maxDim; }
+        else { w = Math.round(w*maxDim/h); h = maxDim; }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+      uploadedBase64 = dataUrl.split(',')[1];
+      uploadedMediaType = 'image/jpeg';
+      const preview = document.getElementById('previewImg');
+      preview.src = dataUrl; preview.style.display = 'block';
+      document.getElementById('btnAnalyze').disabled = false;
+    };
+    img.onerror = ()=> alert('Cette image n\'a pas pu être lue. Essaie une autre photo.');
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+const IDENTIFY_Q = "Je ne connais pas le nom de cet objet. Identifie-le précisément, explique à quoi il sert, puis donne un aperçu des matériaux et de la technique pour le fabriquer moi-même.";
+const REVIEW_Q = "Analyse cette réalisation : indique ce qui est réussi, les erreurs éventuelles, et comment l'améliorer.";
+document.getElementById('btnModeIdentify').addEventListener('click', ()=>{
+  document.getElementById('analysisQuestion').value = IDENTIFY_Q;
+});
+document.getElementById('btnModeReview').addEventListener('click', ()=>{
+  document.getElementById('analysisQuestion').value = REVIEW_Q;
+});
+
+document.getElementById('btnAnalyze').addEventListener('click', async ()=>{
+  if(!uploadedBase64) return;
+  const loadingEl = document.getElementById('analysisLoading');
+  const out = document.getElementById('analysisOut');
+  out.style.display = 'none';
+  loadingEl.innerHTML = `<div class="loading"><div class="spinner"></div>NELLY observe ta photo…</div>`;
+  const question = document.getElementById('analysisQuestion').value.trim() ||
+    "Identifie ce qui est visible sur cette photo. S'il s'agit d'un objet de référence dont on ne connaît pas le nom, dis ce que c'est et comment il pourrait être fabriqué. S'il s'agit d'une réalisation en cours, donne un retour constructif sur ce qui est réussi et ce qui peut être amélioré.";
+  try{
+    const text = await callClaude({
+      maxTokens: 1000,
+      system: `Tu es NELLY, mentore bienveillante et précise de NC-OS. Tu observes une photo envoyée par l'utilisateur. Deux cas possibles : (1) c'est une photo de référence d'un objet (jouet, meuble, pièce, décoration…) que l'utilisateur aimerait fabriquer mais dont il/elle ne connaît pas le nom — dans ce cas, identifie clairement l'objet, explique à quoi il sert, et donne un aperçu concret des matériaux et de la technique pour le fabriquer soi-même. (2) c'est une photo de sa propre réalisation en cours — dans ce cas, donne un retour concret, constructif et actionnable sur ce qui est réussi, les erreurs, et comment les corriger. Détermine automatiquement quel cas s'applique d'après la photo et la question. Réponds en français, sans jargon inutile.`,
+      userContent: [
+        {type:'image', source:{type:'base64', media_type: uploadedMediaType, data: uploadedBase64}},
+        {type:'text', text: question}
+      ]
+    });
+    loadingEl.innerHTML = '';
+    out.style.display = 'block';
+    out.textContent = text;
+  }catch(e){
+    loadingEl.innerHTML = `<div class="loading">⚠ Échec de l'analyse (${e.message}). Réessaie.</div>`;
+  }
+});
+</script>
+</body>
+  </html>
 
